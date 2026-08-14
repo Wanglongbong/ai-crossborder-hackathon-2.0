@@ -43,7 +43,7 @@ const app = new Hono()
       const auth = c.get("authUser");
       const { id } = c.req.valid("param");
 
-      if (!auth.token?.id) {
+      if (!auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -52,7 +52,7 @@ const app = new Hono()
         .where(
           and(
             eq(projects.id, id),
-            eq(projects.userId, auth.token.id),
+            eq(projects.userId, auth.token.sub),
           ),
         )
         .returning();
@@ -72,7 +72,7 @@ const app = new Hono()
       const auth = c.get("authUser");
       const { id } = c.req.valid("param");
 
-      if (!auth.token?.id) {
+      if (!auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -82,7 +82,7 @@ const app = new Hono()
         .where(
           and(
             eq(projects.id, id),
-            eq(projects.userId, auth.token.id),
+            eq(projects.userId, auth.token.sub),
           ),
         );
 
@@ -99,7 +99,7 @@ const app = new Hono()
           json: project.json,
           width: project.width,
           height: project.height,
-          userId: auth.token.id,
+          userId: auth.token.sub,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -122,14 +122,14 @@ const app = new Hono()
       const auth = c.get("authUser");
       const { page, limit } = c.req.valid("query");
 
-      if (!auth.token?.id) {
+      if (!auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
       const data = await db
         .select()
         .from(projects)
-        .where(eq(projects.userId, auth.token.id))
+        .where(eq(projects.userId, auth.token.sub))
         .limit(limit)
         .offset((page - 1) * limit)
         .orderBy(desc(projects.updatedAt))
@@ -163,7 +163,7 @@ const app = new Hono()
       const { id } = c.req.valid("param");
       const values = c.req.valid("json");
 
-      if (!auth.token?.id) {
+      if (!auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -176,7 +176,7 @@ const app = new Hono()
         .where(
           and(
             eq(projects.id, id),
-            eq(projects.userId, auth.token.id),
+            eq(projects.userId, auth.token.sub),
           ),
         )
         .returning();
@@ -196,7 +196,7 @@ const app = new Hono()
       const auth = c.get("authUser");
       const { id } = c.req.valid("param");
 
-      if (!auth.token?.id) {
+      if (!auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -206,7 +206,7 @@ const app = new Hono()
         .where(
           and(
             eq(projects.id, id),
-            eq(projects.userId, auth.token.id)
+            eq(projects.userId, auth.token.sub)
           )
         );
 
@@ -233,7 +233,7 @@ const app = new Hono()
       const auth = c.get("authUser");
       const { name, json, height, width } = c.req.valid("json");
 
-      if (!auth.token?.id) {
+      if (!auth.token?.sub) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -244,7 +244,7 @@ const app = new Hono()
           json,
           width,
           height,
-          userId: auth.token.id,
+          userId: auth.token.sub,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
