@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { useFailModal } from "@/features/subscriptions/store/use-fail-modal";
 import { useSuccessModal } from "@/features/subscriptions/store/use-success-modal";
 
-export const SubscriptionAlert = () => {
+const SubscriptionAlertContent = () => {
   const params = useSearchParams();
 
   const { onOpen: onOpenFail } = useFailModal();
@@ -26,4 +26,12 @@ export const SubscriptionAlert = () => {
   }, [canceled, onOpenFail, success, onOpenSuccess]);
 
   return null;
+};
+
+export const SubscriptionAlert = () => {
+  return (
+    <Suspense fallback={null}>
+      <SubscriptionAlertContent />
+    </Suspense>
+  );
 };

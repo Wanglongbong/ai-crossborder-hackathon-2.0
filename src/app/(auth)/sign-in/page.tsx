@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import { SignInCard } from "@/features/auth/components/sign-in-card";
@@ -11,7 +12,11 @@ const SignInPage = async () => {
     redirect("/");
   }
 
-  return <SignInCard />;
+  return (
+    <Suspense fallback={null}>
+      <SignInCard />
+    </Suspense>
+  );
 };
 
 export default SignInPage;
