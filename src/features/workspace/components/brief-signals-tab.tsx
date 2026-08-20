@@ -315,7 +315,6 @@ export const BriefSignalsTab = ({
 
     updateProjectMutation.mutate(
       {
-        id: project.id,
         name: campaignData.productName || project.name,
         json: updatedJson,
       },
