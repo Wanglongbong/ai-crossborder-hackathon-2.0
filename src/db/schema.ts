@@ -138,3 +138,81 @@ export const subscriptions = pgTable("subscription", {
   createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
   updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
 });
+
+// BytePlus BP-01 Commerce Campaign Launch Copilot Schemas
+export const campaigns = pgTable("campaign", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  projectId: text("projectId")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  productName: text("productName").notNull(),
+  category: text("category").notNull(),
+  pricePromo: text("pricePromo"),
+  targetMarket: text("targetMarket").default("VN"),
+  requiredClaims: text("requiredClaims"),
+  restrictedClaims: text("restrictedClaims"),
+  brandKitJson: text("brandKitJson"),
+  marketSignalJson: text("marketSignalJson"),
+  positioningJson: text("positioningJson"),
+  status: text("status").default("draft"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
+});
+
+export const creativeRoutes = pgTable("creative_route", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  campaignId: text("campaignId")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  routeType: text("routeType").notNull(), // "ROUTE_A" | "ROUTE_B"
+  routeName: text("routeName").notNull(),
+  hookIdea: text("hookIdea").notNull(),
+  visualDirection: text("visualDirection").notNull(),
+  messageAngle: text("messageAngle").notNull(),
+  suggestedPlatform: text("suggestedPlatform").notNull(),
+  adCopyJson: text("adCopyJson"),
+  videoAssetUrl: text("videoAssetUrl"),
+  videoStoryboardJson: text("videoStoryboardJson"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+});
+
+export const campaignAssets = pgTable("campaign_asset", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  campaignId: text("campaignId")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  routeId: text("routeId").references(() => creativeRoutes.id, { onDelete: "cascade" }),
+  assetType: text("assetType").notNull(), // "HERO_IMAGE" | "DETAIL_SKU" | "COLLECTION" | "MARKETPLACE_COVER" | "PROMO_BANNER"
+  imageUrl: text("imageUrl").notNull(),
+  aspectRatio: text("aspectRatio").default("1:1"),
+  promptUsed: text("promptUsed"),
+  modelUsed: text("modelUsed").default("Seedream 5.0 Pro"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+});
+
+export const abTestPlans = pgTable("ab_test_plan", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  campaignId: text("campaignId")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  hypothesis: text("hypothesis").notNull(),
+  routeAOverview: text("routeAOverview").notNull(),
+  routeBOverview: text("routeBOverview").notNull(),
+  testVariable: text("testVariable").notNull(),
+  targetMetricsJson: text("targetMetricsJson").notNull(),
+  expectedLearning: text("expectedLearning").notNull(),
+  performanceAdviceJson: text("performanceAdviceJson"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+});
+

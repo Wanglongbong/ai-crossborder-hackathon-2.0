@@ -1,15 +1,26 @@
+"use client";
+
 import { Navbar } from "./navbar";
 import { Sidebar } from "./sidebar";
+import { useSidebar } from "@/hooks/use-sidebar";
+import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-};
+}
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  return ( 
+  const { isCollapsed } = useSidebar();
+
+  return (
     <div className="bg-muted h-full">
       <Sidebar />
-      <div className="lg:pl-[300px] flex flex-col h-full">
+      <div
+        className={cn(
+          "flex flex-col h-full transition-all duration-300",
+          isCollapsed ? "lg:pl-[72px]" : "lg:pl-[300px]"
+        )}
+      >
         <Navbar />
         <main className="bg-white flex-1 overflow-auto p-8 lg:rounded-tl-2xl">
           {children}
@@ -18,5 +29,5 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     </div>
   );
 };
- 
+
 export default DashboardLayout;

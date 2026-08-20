@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Space_Grotesk } from "next/font/google";
 
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/hooks/use-sidebar";
 
 const font = Space_Grotesk({
   weight: ["700"],
@@ -10,13 +13,24 @@ const font = Space_Grotesk({
 });
 
 export const Logo = () => {
+  const { isCollapsed } = useSidebar();
+
   return (
     <Link href="/">
-      <div className="flex items-center gap-x-2 hover:opacity-75 transition h-[68px] px-4">
-        <div className="size-8 relative">
+      <div
+        className={cn(
+          "flex items-center gap-x-2 hover:opacity-75 transition h-[68px] px-4",
+          isCollapsed && "justify-center px-2"
+        )}
+      >
+        <div className="size-8 relative shrink-0">
           <Image src="/logo.svg" alt="The Canvas" fill />
         </div>
-        <h1 className={cn(font.className, "text-xl font-bold")}>The Canvas</h1>
+        {!isCollapsed && (
+          <h1 className={cn(font.className, "text-xl font-bold truncate")}>
+            The Canvas
+          </h1>
+        )}
       </div>
     </Link>
   );
