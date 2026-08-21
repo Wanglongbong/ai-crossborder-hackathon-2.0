@@ -28,6 +28,19 @@ Start here: **[00-PREREQUISITES.md](./docs/README/00-PREREQUISITES.md)**
 - 📱 **Fully Responsive** - Works on all devices
 - 🔍 **Project Management** - Create and organize multiple projects
 - 🎯 **Unsplash Integration** - Millions of free stock photos
+- 🗂️ **Commerce Media Library** - R2-backed uploads, rich filters, bulk actions, previews, and non-destructive image versions
+- 📦 **Product Catalog** - PostgreSQL-backed products, CSV/XLSX import/export, spreadsheet editing, and campaign creation
+
+### Commerce setup
+
+The Media and Products modules require the `R2_*` variables from `.env.example`, a non-empty `AUTH_SECRET`, and the PostgreSQL schema in `drizzle/0001_shocking_wendigo.sql`.
+
+```bash
+npx drizzle-kit migrate
+npm run dev
+```
+
+When authentication, PostgreSQL, or R2 is unavailable, the UI clearly enters **Demo data · not synced** mode. Demo product edits are stored only in the current browser. Before a live demo, configure R2 CORS to allow `PUT` from the app origin and rotate any credentials that have been shared outside the deployment secret manager.
 
 ---
 

@@ -207,7 +207,7 @@ export const SidebarRoutes = () => {
 
                 return (
                   <button
-                    key={sub.tab}
+                    key={`${sub.tab}-${"action" in sub ? sub.action : "list"}`}
                     type="button"
                     onClick={() => router.push(`/content-ai?tab=${sub.tab}${"action" in sub ? `&action=${sub.action}` : ""}`)}
                     className={cn(
