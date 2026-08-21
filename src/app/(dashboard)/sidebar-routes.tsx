@@ -6,7 +6,8 @@ import {
   Crown,
   Home,
   MessageCircleQuestion,
-  Layers,
+  Store,
+  Megaphone,
   Package,
   FolderTree,
   Palette,
@@ -46,8 +47,8 @@ export const SidebarRoutes = () => {
   const { shouldBlock, isLoading, triggerPaywall } = usePaywall();
   const { isCollapsed } = useSidebar();
 
-  const isCampaignActive = pathname.startsWith("/content-ai") || pathname.startsWith("/workspace");
-  const [isCampaignMenuOpen, setIsCampaignMenuOpen] = useState(true);
+  const isStoreActive = pathname.startsWith("/content-ai") || pathname.startsWith("/product");
+  const [isStoreMenuOpen, setIsStoreMenuOpen] = useState(true);
 
   const onClickBilling = () => {
     if (shouldBlock) {
@@ -57,7 +58,7 @@ export const SidebarRoutes = () => {
     billingMutation.mutate();
   };
 
-  const campaignSubItems = [
+  const storeSubItems = [
     { label: "Products", tab: "products", icon: Package },
     { label: "Categories", tab: "categories", icon: FolderTree },
     { label: "Brands", tab: "brands", icon: Palette },
@@ -112,42 +113,44 @@ export const SidebarRoutes = () => {
       <div className="px-3 space-y-1">
         <SidebarItem href="/" icon={Home} label="Dashboard" isActive={pathname === "/"} />
 
-        {/* Campaign Parent Item */}
+        <SidebarItem href="/campaigns" icon={Megaphone} label="Campaigns" isActive={pathname.startsWith("/campaigns") || pathname.startsWith("/workspace")} />
+
+        {/* Store Parent Item */}
         <div>
           <div
             onClick={() => {
               if (isCollapsed) {
                 router.push("/content-ai?tab=products");
               } else {
-                setIsCampaignMenuOpen(!isCampaignMenuOpen);
+                setIsStoreMenuOpen(!isStoreMenuOpen);
               }
             }}
             className={cn(
               "flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold select-none",
-              isCampaignActive
+              isStoreActive
                 ? "bg-white shadow-xs text-indigo-700 font-bold border border-slate-200/60"
                 : "text-slate-700 hover:bg-slate-200/60",
               isCollapsed && "justify-center px-2"
             )}
           >
             <div className="flex items-center gap-2.5">
-              <Layers className="size-4 text-indigo-600 shrink-0" />
-              {!isCollapsed && <span>Campaign</span>}
+              <Store className="size-4 text-indigo-600 shrink-0" />
+              {!isCollapsed && <span>Store</span>}
             </div>
             {!isCollapsed && (
               <ChevronDown
                 className={cn(
                   "size-3.5 text-slate-400 transition-transform duration-200",
-                  isCampaignMenuOpen && "rotate-180"
+                  isStoreMenuOpen && "rotate-180"
                 )}
               />
             )}
           </div>
 
           {/* Sub-menu (WooCommerce style sub-items) */}
-          {!isCollapsed && isCampaignMenuOpen && (
+          {!isCollapsed && isStoreMenuOpen && (
             <div className="pl-4 pr-1 pt-1 space-y-0.5 border-l-2 border-indigo-100 ml-5 mt-1">
-              {campaignSubItems.map((sub) => {
+              {storeSubItems.map((sub) => {
                 const SubIcon = sub.icon;
                 const isSubActive =
                   pathname.startsWith("/content-ai") && currentTab === sub.tab;
