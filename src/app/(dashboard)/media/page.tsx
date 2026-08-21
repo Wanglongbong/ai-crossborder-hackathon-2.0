@@ -1,241 +1,65 @@
 "use client";
 
-import { ChangeEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Check,
-  FileImage,
-  Grid2X2,
-  Image as ImageIcon,
-  List,
-  Plus,
-  Search,
-  Trash2,
-  UploadCloud,
-  X,
-} from "lucide-react";
+import { Archive, CheckSquare2, Download, FileAudio, FileText, FileVideo, Grid2X2, Image as ImageIcon, List, Pencil, Plus, Search, Tags, Trash2, UploadCloud, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { mockProducts } from "@/features/campaign/mock-data";
+import { MediaImageEditor } from "@/features/media/media-image-editor";
 import { cn } from "@/lib/utils";
 
-type MediaItem = {
-  id: string;
-  name: string;
-  url: string;
-  type: "image" | "video";
-  mime: string;
-  size: string;
-  uploaded: string;
-  source: string;
-  alt: string;
-  attachedTo?: string;
-};
+type MediaType = "image" | "video" | "audio" | "document";
+type MediaItem = { id: string; name: string; url: string; mediaType: MediaType; mimeType: string; sizeBytes: number; createdAt: string; source: string; altText: string; caption: string; attachedTo?: string; width?: number; height?: number; durationSeconds?: number; tags: string[]; objectKey?: string; parentAssetId?: string };
 
-const extraMedia: MediaItem[] = [
-  {
-    id: "campaign-cover",
-    name: "campaign-collection-cover.jpg",
-    url: "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=1200&q=85",
-    type: "image",
-    mime: "image/jpeg",
-    size: "428 KB",
-    uploaded: "Today",
-    source: "Campaign collection",
-    alt: "Skincare campaign collection on a clean studio surface",
-    attachedTo: "Q3 Barrier Recovery Launch",
-  },
-  {
-    id: "marketplace-cover",
-    name: "marketplace-square-cover.jpg",
-    url: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=1200&q=85",
-    type: "image",
-    mime: "image/jpeg",
-    size: "512 KB",
-    uploaded: "Yesterday",
-    source: "Seedream output",
-    alt: "Marketplace product cover",
-    attachedTo: "SkinGlow Pro 10% Niacinamide Serum",
-  },
-  {
-    id: "lifestyle-shot",
-    name: "morning-routine-lifestyle.jpg",
-    url: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1200&q=85",
-    type: "image",
-    mime: "image/jpeg",
-    size: "386 KB",
-    uploaded: "2 days ago",
-    source: "Product source",
-    alt: "Morning skincare routine",
-  },
+const productMedia: MediaItem[] = mockProducts.flatMap((product, productIndex) => product.assets.map((asset, index) => ({ id: `${product.id}-${asset.id}`, name: `${product.sku.toLowerCase()}-${asset.name.toLowerCase().replace(/\s+/g, "-")}.jpg`, url: asset.url, mediaType: "image", mimeType: "image/jpeg", sizeBytes: 320000 + index * 21000, createdAt: new Date(Date.now() - (productIndex * 5 + index) * 86400000).toISOString(), source: asset.role, altText: asset.name, caption: "", attachedTo: product.name, width: 1200, height: 1200, tags: [product.category, asset.role] })));
+const demoMedia: MediaItem[] = [...productMedia,
+  { id: "demo-video", name: "route-a-tiktok-prototype.mp4", url: "", mediaType: "video", mimeType: "video/mp4", sizeBytes: 12400000, createdAt: new Date(Date.now() - 86400000).toISOString(), source: "Seedance output", altText: "", caption: "15-second campaign prototype", attachedTo: "Q3 Barrier Recovery Launch", durationSeconds: 15, tags: ["TikTok", "Route A"] },
+  { id: "demo-audio", name: "vietnamese-voiceover.mp3", url: "", mediaType: "audio", mimeType: "audio/mpeg", sizeBytes: 2400000, createdAt: new Date(Date.now() - 3 * 86400000).toISOString(), source: "Audio 1.0", altText: "", caption: "Vietnamese localized voiceover", durationSeconds: 22, tags: ["Voiceover", "Vietnamese"] },
+  { id: "demo-doc", name: "campaign-testing-plan.pdf", url: "", mediaType: "document", mimeType: "application/pdf", sizeBytes: 680000, createdAt: new Date(Date.now() - 8 * 86400000).toISOString(), source: "Campaign pack", altText: "", caption: "A/B testing plan", tags: ["A/B test"] },
 ];
 
-const productMedia: MediaItem[] = mockProducts.flatMap((product) =>
-  product.assets.map((asset) => ({
-    id: `${product.id}-${asset.id}`,
-    name: `${product.sku.toLowerCase()}-${asset.name.toLowerCase().replace(/\s+/g, "-")}.jpg`,
-    url: asset.url,
-    type: "image" as const,
-    mime: "image/jpeg",
-    size: "320 KB",
-    uploaded: "This week",
-    source: asset.role,
-    alt: asset.name,
-    attachedTo: product.name,
-  })),
-);
-
-const initialMedia = [...productMedia, ...extraMedia];
-
 export default function MediaLibraryPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState<MediaItem[]>(initialMedia);
-  const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [view, setView] = useState<"grid" | "list">("grid");
-  const [selectedId, setSelectedId] = useState<string | null>(initialMedia[0]?.id ?? null);
-  const showUploader = searchParams.get("action") === "upload";
+  const router = useRouter(); const searchParams = useSearchParams(); const inputRef = useRef<HTMLInputElement>(null);
+  const [items, setItems] = useState<MediaItem[]>(demoMedia); const [demoMode, setDemoMode] = useState(true); const [query, setQuery] = useState(""); const [type, setType] = useState("all"); const [month, setMonth] = useState("all"); const [attachment, setAttachment] = useState("all"); const [sort, setSort] = useState("newest"); const [view, setView] = useState<"grid" | "list">("grid"); const [selectedId, setSelectedId] = useState<string | null>(null); const [checked, setChecked] = useState<Set<string>>(new Set()); const [bulkMode, setBulkMode] = useState(false); const [editing, setEditing] = useState(false); const [uploading, setUploading] = useState(false);
+  const showUploader = searchParams.get("action") === "upload"; const selected = items.find((item) => item.id === selectedId) || null;
 
-  const selected = items.find((item) => item.id === selectedId) ?? null;
-  const filtered = useMemo(
-    () =>
-      items.filter((item) => {
-        const matchesType = typeFilter === "all" || item.type === typeFilter;
-        const haystack = `${item.name} ${item.alt} ${item.source} ${item.attachedTo ?? ""}`.toLowerCase();
-        return matchesType && haystack.includes(query.toLowerCase());
-      }),
-    [items, query, typeFilter],
-  );
+  useEffect(() => { fetch("/api/media?page=1&limit=100&type=all&sort=newest").then(async (response) => { if (!response.ok) throw new Error(); return response.json(); }).then((payload) => { setItems(payload.data); setDemoMode(false); }).catch(() => setDemoMode(true)); }, []);
+  const months = useMemo(() => Array.from(new Set(items.map((item) => item.createdAt.slice(0, 7)))).sort().reverse(), [items]);
+  const filtered = useMemo(() => items.filter((item) => { const haystack = `${item.name} ${item.altText} ${item.caption} ${item.source} ${item.attachedTo || ""} ${item.tags.join(" ")}`.toLowerCase(); return (type === "all" || item.mediaType === type) && (month === "all" || item.createdAt.startsWith(month)) && (attachment === "all" || (attachment === "attached" ? item.attachedTo : !item.attachedTo)) && haystack.includes(query.toLowerCase()); }).sort((a, b) => sort === "oldest" ? a.createdAt.localeCompare(b.createdAt) : sort === "name" ? a.name.localeCompare(b.name) : sort === "size" ? b.sizeBytes - a.sizeBytes : b.createdAt.localeCompare(a.createdAt)), [items, type, month, attachment, query, sort]);
 
-  const onFiles = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-    if (!files.length) return;
+  const uploadOne = async (file: File, parentAssetId?: string) => { const mediaType = getMediaType(file.type); const dimensions = await getDimensions(file); const signedResponse = await fetch("/api/media/upload-url", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: file.name, mimeType: file.type || "application/octet-stream", sizeBytes: file.size }) }); if (!signedResponse.ok) throw new Error("Storage unavailable"); const signed = (await signedResponse.json()).data; const put = await fetch(signed.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file }); if (!put.ok) throw new Error("Upload failed"); const response = await fetch(parentAssetId ? `/api/media/${parentAssetId}/versions` : "/api/media", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: file.name, objectKey: signed.objectKey, url: signed.publicUrl, mediaType, mimeType: file.type, sizeBytes: file.size, ...dimensions, altText: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "), source: parentAssetId ? "Image editor" : "Upload", tags: [] }) }); if (!response.ok) throw new Error("Metadata save failed"); return (await response.json()).data as MediaItem; };
+  const onFiles = async (event: ChangeEvent<HTMLInputElement>) => { const files = Array.from(event.target.files || []); if (!files.length) return; setUploading(true); const additions: MediaItem[] = []; for (const file of files) { try { additions.push(await uploadOne(file)); } catch { const dimensions = await getDimensions(file); additions.push({ id: `demo-${crypto.randomUUID()}`, name: file.name, url: URL.createObjectURL(file), mediaType: getMediaType(file.type), mimeType: file.type || "application/octet-stream", sizeBytes: file.size, createdAt: new Date().toISOString(), source: "Demo upload", altText: file.name.replace(/\.[^.]+$/, ""), caption: "", tags: [], ...dimensions }); setDemoMode(true); } } setItems((current) => [...additions, ...current]); setUploading(false); router.push("/media"); toast.success(`${additions.length} file(s) added.`); event.target.value = ""; };
+  const patchSelected = (patch: Partial<MediaItem>) => { if (selected) setItems((current) => current.map((item) => item.id === selected.id ? { ...item, ...patch } : item)); };
+  const saveDetails = async () => { if (!selected) return; if (!demoMode && !selected.id.startsWith("demo-")) { const response = await fetch(`/api/media/${selected.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: selected.name, altText: selected.altText, caption: selected.caption, tags: selected.tags }) }); if (!response.ok) return toast.error("Could not save attachment details."); } toast.success("Attachment details saved."); };
+  const trash = async (ids: string[]) => { if (!ids.length || !confirm(`Move ${ids.length} item(s) to trash?`)) return; if (!demoMode) await fetch("/api/media/bulk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids, action: "trash" }) }); setItems((current) => current.filter((item) => !ids.includes(item.id))); setChecked(new Set()); setSelectedId(null); toast.success("Moved to trash."); };
+  const addBulkTag = async () => { const tag = prompt("Tag for selected media:"); if (!tag?.trim()) return; const ids = Array.from(checked); if (!demoMode) await fetch("/api/media/bulk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids, action: "tag", tag: tag.trim() }) }); setItems((current) => current.map((item) => ids.includes(item.id) ? { ...item, tags: Array.from(new Set([...item.tags, tag.trim()])) } : item)); toast.success("Tag added."); };
+  const toggle = (id: string) => setChecked((current) => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next; });
+  const saveVersion = async (blob: Blob, width: number, height: number) => { if (!selected) return; const file = new window.File([blob], `${selected.name.replace(/\.[^.]+$/, "")}-edited.png`, { type: "image/png" }); let version: MediaItem; try { version = await uploadOne(file, selected.id); } catch { version = { ...selected, id: `demo-${crypto.randomUUID()}`, parentAssetId: selected.id, name: file.name, url: URL.createObjectURL(file), mimeType: "image/png", sizeBytes: file.size, width, height, source: "Image editor", createdAt: new Date().toISOString() }; setDemoMode(true); } setItems((current) => [version, ...current]); setSelectedId(version.id); toast.success("New version saved; the original remains unchanged."); };
 
-    const additions = files.map<MediaItem>((file, index) => ({
-      id: `local-${Date.now()}-${index}`,
-      name: file.name,
-      url: URL.createObjectURL(file),
-      type: file.type.startsWith("video/") ? "video" : "image",
-      mime: file.type || "application/octet-stream",
-      size: formatBytes(file.size),
-      uploaded: "Just now",
-      source: "Local upload",
-      alt: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
-    }));
-
-    setItems((current) => [...additions, ...current]);
-    setSelectedId(additions[0].id);
-    router.push("/media");
-    toast.success(`${files.length} media file${files.length > 1 ? "s" : ""} added to this demo session.`);
-    event.target.value = "";
-  };
-
-  const removeSelected = () => {
-    if (!selected) return;
-    setItems((current) => current.filter((item) => item.id !== selected.id));
-    setSelectedId(null);
-    toast.success("Media item removed from this demo session.");
-  };
-
-  const updateSelected = (patch: Partial<MediaItem>) => {
-    if (!selected) return;
-    setItems((current) => current.map((item) => (item.id === selected.id ? { ...item, ...patch } : item)));
-  };
-
-  return (
-    <div className="mx-auto max-w-7xl space-y-5 pb-12">
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-950 to-slate-800 p-6 text-white md:flex-row md:items-center md:justify-between">
-        <div>
-          <Badge className="bg-white/15 text-white hover:bg-white/15">Commerce asset library</Badge>
-          <h1 className="mt-3 text-2xl font-bold">Media Library</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">
-            Keep product sources, generated campaign assets and marketplace exports in one reusable library.
-          </p>
-        </div>
-        <Button className="bg-white text-slate-950 hover:bg-slate-100" onClick={() => router.push("/media?action=upload")}>
-          <Plus className="mr-2 size-4" /> Add Media File
-        </Button>
-      </div>
-
-      {showUploader && (
-        <Card className="border-dashed border-indigo-300 bg-indigo-50/40">
-          <CardContent className="relative flex min-h-56 flex-col items-center justify-center p-8 text-center">
-            <Button className="absolute right-3 top-3" variant="ghost" size="icon" onClick={() => router.push("/media")}>
-              <X className="size-4" />
-            </Button>
-            <div className="rounded-full bg-white p-4 shadow-sm">
-              <UploadCloud className="size-8 text-indigo-600" />
-            </div>
-            <h2 className="mt-4 font-bold">Drop files to upload</h2>
-            <p className="mt-1 text-sm text-slate-500">Images and videos are added locally for this prototype session.</p>
-            <Button className="mt-5" onClick={() => inputRef.current?.click()}>Select Files</Button>
-          </CardContent>
-        </Card>
-      )}
-
-      <input ref={inputRef} type="file" className="hidden" accept="image/*,video/*" multiple onChange={onFiles} />
-
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-white p-3">
-        <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} className="h-10 rounded-md border bg-white px-3 text-sm">
-          <option value="all">All media items</option>
-          <option value="image">Images</option>
-          <option value="video">Videos</option>
-        </select>
-        <div className="relative min-w-[240px] flex-1">
-          <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
-          <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search media" className="pl-9" />
-        </div>
-        <div className="flex rounded-md border p-1">
-          <Button variant={view === "grid" ? "secondary" : "ghost"} size="icon" className="size-8" onClick={() => setView("grid")} aria-label="Grid view"><Grid2X2 className="size-4" /></Button>
-          <Button variant={view === "list" ? "secondary" : "ghost"} size="icon" className="size-8" onClick={() => setView("list")} aria-label="List view"><List className="size-4" /></Button>
-        </div>
-        <span className="text-xs text-slate-500">{filtered.length} items</span>
-      </div>
-
-      <div className={cn("grid gap-5", selected && "xl:grid-cols-[1fr_320px]")}>
-        {view === "grid" ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-            {filtered.map((item) => (
-              <button key={item.id} type="button" onClick={() => setSelectedId(item.id)} className={cn("group relative overflow-hidden rounded-lg border bg-white text-left transition hover:border-indigo-300 hover:shadow-sm", selectedId === item.id && "border-indigo-500 ring-2 ring-indigo-100")}>
-                {item.type === "image" ? <img src={item.url} alt={item.alt} className="aspect-square w-full object-cover" /> : <div className="flex aspect-square items-center justify-center bg-slate-100"><FileImage className="size-8 text-slate-400" /></div>}
-                {selectedId === item.id && <span className="absolute right-2 top-2 rounded-full bg-indigo-600 p-1 text-white"><Check className="size-3" /></span>}
-                <div className="p-2.5"><p className="truncate text-xs font-semibold">{item.name}</p><p className="mt-1 truncate text-[11px] text-slate-500">{item.source}</p></div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <Card><CardContent className="p-0"><div className="divide-y">{filtered.map((item) => <button key={item.id} onClick={() => setSelectedId(item.id)} className={cn("flex w-full items-center gap-3 p-3 text-left hover:bg-slate-50", selectedId === item.id && "bg-indigo-50")}><img src={item.url} alt={item.alt} className="size-12 rounded object-cover" /><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{item.name}</p><p className="text-xs text-slate-500">{item.mime} · {item.size}</p></div><span className="hidden text-xs text-slate-500 md:block">{item.attachedTo ?? "Unattached"}</span></button>)}</div></CardContent></Card>
-        )}
-
-        {selected && (
-          <aside className="h-fit overflow-hidden rounded-xl border bg-white xl:sticky xl:top-4">
-            <div className="flex items-center justify-between border-b bg-slate-50 px-4 py-3"><p className="text-sm font-bold">Attachment details</p><Button variant="ghost" size="icon" className="size-7" onClick={() => setSelectedId(null)}><X className="size-4" /></Button></div>
-            {selected.type === "image" ? <img src={selected.url} alt={selected.alt} className="aspect-video w-full object-cover" /> : <div className="flex aspect-video items-center justify-center bg-slate-100"><ImageIcon className="size-10 text-slate-400" /></div>}
-            <div className="space-y-4 p-4">
-              <div><p className="break-all text-sm font-semibold">{selected.name}</p><p className="mt-1 text-xs text-slate-500">{selected.uploaded} · {selected.size} · {selected.mime}</p></div>
-              <div className="space-y-1.5"><Label className="text-xs">Alternative Text</Label><Textarea value={selected.alt} onChange={(event) => updateSelected({ alt: event.target.value })} rows={3} /></div>
-              <div className="space-y-1.5"><Label className="text-xs">File name</Label><Input value={selected.name} onChange={(event) => updateSelected({ name: event.target.value })} /></div>
-              <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600"><b>Attached to</b><br />{selected.attachedTo ?? "Unattached"}<br /><span className="text-slate-400">Source: {selected.source}</span></div>
-              <Button variant="outline" className="w-full text-rose-600 hover:text-rose-700" onClick={removeSelected}><Trash2 className="mr-2 size-4" />Delete permanently</Button>
-            </div>
-          </aside>
-        )}
-      </div>
-    </div>
-  );
+  return <div className="mx-auto max-w-[1500px] space-y-5 pb-12"><header className="flex flex-col gap-4 rounded-2xl border bg-gradient-to-r from-slate-950 to-slate-800 p-6 text-white md:flex-row md:items-center md:justify-between"><div><div className="flex items-center gap-2"><Badge className="bg-white/15 text-white">Commerce asset library</Badge>{demoMode && <Badge className="bg-amber-400 text-amber-950">Demo data · not synced</Badge>}</div><h1 className="mt-3 text-2xl font-bold">Media Library</h1><p className="mt-2 text-sm text-slate-300">Find, inspect and reuse every product, campaign and marketplace asset.</p></div><Button className="bg-white text-slate-950 hover:bg-slate-100" onClick={() => router.push("/media?action=upload")}><Plus className="mr-2 size-4" />Add Media File</Button></header>
+    {showUploader && <Card className="border-dashed border-indigo-300 bg-indigo-50/50"><CardContent className="relative flex min-h-52 flex-col items-center justify-center p-8"><Button className="absolute right-3 top-3" variant="ghost" size="icon" onClick={() => router.push("/media")}><X className="size-4" /></Button><UploadCloud className="size-9 text-indigo-600" /><h2 className="mt-3 font-bold">Upload commerce assets</h2><p className="mt-1 text-sm text-slate-500">Images, videos, audio, PDF, CSV and XLSX · maximum 100 MB each.</p><Button className="mt-4" disabled={uploading} onClick={() => inputRef.current?.click()}>{uploading ? "Uploading…" : "Select files"}</Button></CardContent></Card>}<input ref={inputRef} type="file" className="hidden" accept="image/*,video/*,audio/*,.pdf,.csv,.xlsx" multiple onChange={onFiles} />
+    <div className="space-y-3 rounded-xl border bg-white p-3"><div className="flex flex-wrap items-center gap-2"><Select value={type} onChange={setType} options={[["all", "All media"], ["image", "Images"], ["video", "Videos"], ["audio", "Audio"], ["document", "Documents"]]} /><Select value={month} onChange={setMonth} options={[["all", "All dates"], ...months.map((value) => [value, new Date(`${value}-01`).toLocaleDateString("en", { month: "long", year: "numeric" })])]} /><Select value={attachment} onChange={setAttachment} options={[["all", "All usage"], ["attached", "Attached"], ["unattached", "Unattached"]]} /><Select value={sort} onChange={setSort} options={[["newest", "Newest"], ["oldest", "Oldest"], ["name", "File name"], ["size", "File size"]]} /><div className="relative min-w-[220px] flex-1"><Search className="absolute left-3 top-2.5 size-4 text-slate-400" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search file, tag, product or source" className="pl-9" /></div></div><div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3"><div className="flex items-center gap-2"><Button size="sm" variant={bulkMode ? "secondary" : "outline"} onClick={() => { setBulkMode(!bulkMode); setChecked(new Set()); }}><CheckSquare2 className="mr-1.5 size-4" />Bulk select</Button>{bulkMode && <><Button size="sm" variant="ghost" onClick={() => setChecked(new Set(filtered.map((item) => item.id)))}>Select filtered</Button><Button size="sm" variant="ghost" disabled={!checked.size} onClick={addBulkTag}><Tags className="mr-1 size-4" />Tag</Button><Button size="sm" variant="ghost" className="text-rose-600" disabled={!checked.size} onClick={() => trash(Array.from(checked))}><Trash2 className="mr-1 size-4" />Trash</Button><span className="text-xs text-slate-500">{checked.size} selected</span></>}</div><div className="flex items-center gap-2"><span className="text-xs text-slate-500">{filtered.length} items</span><div className="flex rounded-md border p-1"><Button variant={view === "grid" ? "secondary" : "ghost"} size="icon" className="size-8" onClick={() => setView("grid")}><Grid2X2 className="size-4" /></Button><Button variant={view === "list" ? "secondary" : "ghost"} size="icon" className="size-8" onClick={() => setView("list")}><List className="size-4" /></Button></div></div></div></div>
+    {!filtered.length ? <div className="rounded-xl border border-dashed bg-white py-20 text-center"><Archive className="mx-auto size-10 text-slate-300" /><p className="mt-3 font-semibold">No assets match these filters</p><p className="text-sm text-slate-500">Clear a filter or upload a new file.</p></div> : view === "grid" ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">{filtered.map((item) => <MediaTile key={item.id} item={item} bulkMode={bulkMode} checked={checked.has(item.id)} onCheck={() => toggle(item.id)} onOpen={() => setSelectedId(item.id)} />)}</div> : <Card><CardContent className="p-0"><div className="divide-y">{filtered.map((item) => <MediaRow key={item.id} item={item} bulkMode={bulkMode} checked={checked.has(item.id)} onCheck={() => toggle(item.id)} onOpen={() => setSelectedId(item.id)} />)}</div></CardContent></Card>}
+    <Dialog open={Boolean(selected)} onOpenChange={(open) => !open && setSelectedId(null)}>{selected && <DialogContent className="max-h-[92vh] max-w-6xl overflow-y-auto p-0"><DialogHeader className="border-b px-6 py-4"><DialogTitle>Attachment details</DialogTitle><DialogDescription>Preview, metadata, usage and asset actions.</DialogDescription></DialogHeader><div className="grid lg:grid-cols-[1fr_360px]"><div className="flex min-h-[520px] items-center justify-center bg-slate-950 p-6"><MediaPreview item={selected} large /></div><aside className="space-y-4 p-5"><div><p className="break-all font-semibold">{selected.name}</p><p className="mt-1 text-xs text-slate-500">{selected.mimeType} · {formatBytes(selected.sizeBytes)} · {formatDate(selected.createdAt)}</p>{selected.width && <p className="text-xs text-slate-500">{selected.width} × {selected.height}px</p>}</div><Field label="File name"><Input value={selected.name} onChange={(event) => patchSelected({ name: event.target.value })} /></Field><Field label="Alternative text"><Textarea rows={2} value={selected.altText} onChange={(event) => patchSelected({ altText: event.target.value })} /></Field><Field label="Caption"><Textarea rows={3} value={selected.caption} onChange={(event) => patchSelected({ caption: event.target.value })} /></Field><Field label="Tags (comma separated)"><Input value={selected.tags.join(", ")} onChange={(event) => patchSelected({ tags: event.target.value.split(",").map((value) => value.trim()).filter(Boolean) })} /></Field><div className="rounded-lg bg-slate-50 p-3 text-xs"><b>Used by</b><p className="mt-1 text-slate-600">{selected.attachedTo || "Unattached"}</p><p className="mt-2 text-slate-400">Source: {selected.source}{selected.parentAssetId ? " · Edited version" : ""}</p></div><div className="grid grid-cols-2 gap-2">{selected.mediaType === "image" && <Button variant="outline" onClick={() => setEditing(true)}><Pencil className="mr-2 size-4" />Edit image</Button>}<Button variant="outline" asChild><a href={selected.url || "#"} download={selected.name}><Download className="mr-2 size-4" />Download</a></Button></div><Button className="w-full" onClick={saveDetails}>Save details</Button><Button variant="ghost" className="w-full text-rose-600" onClick={() => trash([selected.id])}><Trash2 className="mr-2 size-4" />Move to trash</Button></aside></div></DialogContent>}</Dialog>{selected?.mediaType === "image" && <MediaImageEditor open={editing} imageUrl={selected.url} imageName={selected.name} onOpenChange={setEditing} onSave={saveVersion} />}
+  </div>;
 }
 
-function formatBytes(bytes: number) {
-  if (bytes === 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB"];
-  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-  return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
-}
+function MediaTile({ item, bulkMode, checked, onCheck, onOpen }: { item: MediaItem; bulkMode: boolean; checked: boolean; onCheck: () => void; onOpen: () => void }) { return <button type="button" onClick={bulkMode ? onCheck : onOpen} className={cn("group relative aspect-square overflow-hidden rounded-xl border bg-slate-100 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md", checked && "border-indigo-500 ring-2 ring-indigo-200")}><MediaPreview item={item} /><div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent px-3 pb-3 pt-10 text-white"><p className="truncate text-xs font-bold">{item.name}</p><p className="mt-0.5 truncate text-[10px] text-slate-300">{item.mediaType} · {formatBytes(item.sizeBytes)} · {item.source}</p></div>{bulkMode && <span className="absolute left-2 top-2 flex size-6 items-center justify-center rounded bg-white shadow"><Checkbox checked={checked} /></span>}<span className="absolute right-2 top-2 rounded bg-slate-950/70 px-1.5 py-1 text-white">{iconFor(item.mediaType, "size-3.5")}</span></button>; }
+function MediaRow({ item, bulkMode, checked, onCheck, onOpen }: { item: MediaItem; bulkMode: boolean; checked: boolean; onCheck: () => void; onOpen: () => void }) { return <button onClick={bulkMode ? onCheck : onOpen} className={cn("grid w-full grid-cols-[auto_64px_1fr] items-center gap-3 p-3 text-left hover:bg-slate-50 md:grid-cols-[auto_64px_2fr_1fr_120px_120px]", checked && "bg-indigo-50")}>{bulkMode ? <Checkbox checked={checked} /> : <span className="w-4" />}<div className="flex size-16 items-center justify-center overflow-hidden rounded-lg border bg-slate-100"><MediaPreview item={item} /></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{item.name}</p><p className="text-xs capitalize text-slate-500">{item.mediaType} · {item.mimeType}</p></div><p className="hidden truncate text-xs text-slate-500 md:block">{item.attachedTo || "Unattached"}</p><p className="hidden text-xs text-slate-500 md:block">{formatBytes(item.sizeBytes)}</p><p className="hidden text-xs text-slate-500 md:block">{formatDate(item.createdAt)}</p></button>; }
+function MediaPreview({ item, large = false }: { item: MediaItem; large?: boolean }) { if (item.mediaType === "image" && item.url) return <img src={item.url} alt={item.altText} className={cn("h-full w-full object-contain", large && "max-h-[70vh]")} />; if (item.mediaType === "video" && item.url) return <video src={item.url} controls={large} className="h-full w-full object-contain" />; if (item.mediaType === "audio" && item.url && large) return <audio src={item.url} controls className="w-full" />; return <div className={cn("flex h-full w-full flex-col items-center justify-center bg-slate-100 text-slate-400", large && "min-h-[480px]")}>{iconFor(item.mediaType, large ? "size-20" : "size-10")}<span className="mt-2 text-xs uppercase">{item.mediaType} preview</span></div>; }
+function iconFor(type: MediaType, className: string) { const Icon = type === "image" ? ImageIcon : type === "video" ? FileVideo : type === "audio" ? FileAudio : FileText; return <Icon className={className} />; }
+function Select({ value, onChange, options }: { value: string; onChange: (value: string) => void; options: string[][] }) { return <select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 rounded-md border bg-white px-3 text-sm">{options.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>; }
+function Field({ label, children }: { label: string; children: React.ReactNode }) { return <div className="space-y-1.5"><Label className="text-xs">{label}</Label>{children}</div>; }
+function getMediaType(mime: string): MediaType { return mime.startsWith("image/") ? "image" : mime.startsWith("video/") ? "video" : mime.startsWith("audio/") ? "audio" : "document"; }
+async function getDimensions(file: File) { if (!file.type.startsWith("image/")) return {}; try { const bitmap = await createImageBitmap(file); const value = { width: bitmap.width, height: bitmap.height }; bitmap.close(); return value; } catch { return {}; } }
+function formatBytes(bytes: number) { if (!bytes) return "0 B"; const units = ["B", "KB", "MB", "GB"]; const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), 3); return `${(bytes / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`; }
+function formatDate(value: string) { return new Date(value).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" }); }

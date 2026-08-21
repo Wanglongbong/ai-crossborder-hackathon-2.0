@@ -216,3 +216,93 @@ export const abTestPlans = pgTable("ab_test_plan", {
   createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
 });
 
+// Commerce source-of-truth tables. Files live in R2; only metadata is stored here.
+export const mediaAssets = pgTable("media_asset", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  parentAssetId: text("parentAssetId"),
+  name: text("name").notNull(),
+  objectKey: text("objectKey").notNull(),
+  url: text("url").notNull(),
+  mediaType: text("mediaType").notNull(),
+  mimeType: text("mimeType").notNull(),
+  sizeBytes: integer("sizeBytes").notNull(),
+  width: integer("width"),
+  height: integer("height"),
+  durationSeconds: integer("durationSeconds"),
+  altText: text("altText"),
+  caption: text("caption"),
+  source: text("source").default("Upload"),
+  tagsJson: text("tagsJson").default("[]"),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
+  deletedAt: timestamp("deletedAt", { mode: "date" }),
+});
+
+export const products = pgTable("product", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  sku: text("sku").notNull(),
+  category: text("category").default("Uncategorized"),
+  brand: text("brand"),
+  imageUrl: text("imageUrl"),
+  priceCents: integer("priceCents").default(0),
+  currency: text("currency").default("USD"),
+  promotion: text("promotion"),
+  description: text("description"),
+  sellingPointsJson: text("sellingPointsJson").default("[]"),
+  requiredClaimsJson: text("requiredClaimsJson").default("[]"),
+  restrictedClaimsJson: text("restrictedClaimsJson").default("[]"),
+  audience: text("audience"),
+  targetMarket: text("targetMarket"),
+  status: text("status").default("draft"),
+  readiness: integer("readiness").default(0),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
+  deletedAt: timestamp("deletedAt", { mode: "date" }),
+});
+
+export const productMedia = pgTable(
+  "product_media",
+  {
+    productId: text("productId")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    mediaAssetId: text("mediaAssetId")
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: "cascade" }),
+    role: text("role").default("gallery"),
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  },
+  (table) => ({
+    compoundKey: primaryKey({ columns: [table.productId, table.mediaAssetId] }),
+  }),
+);
+
+export const campaignProducts = pgTable(
+  "campaign_product",
+  {
+    campaignId: text("campaignId")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    productId: text("productId")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  },
+  (table) => ({
+    compoundKey: primaryKey({ columns: [table.campaignId, table.productId] }),
+  }),
+);
+
+export const mediaAssetsInsertSchema = createInsertSchema(mediaAssets);
+export const productsInsertSchema = createInsertSchema(products);

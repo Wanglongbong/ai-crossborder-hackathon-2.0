@@ -8,6 +8,8 @@ import images from "./images";
 import projects from "./projects";
 import subscriptions from "./subscriptions";
 import campaign from "./campaign";
+import media from "./media";
+import products from "./products";
 
 import authConfig from "@/auth.config";
 
@@ -31,7 +33,9 @@ const routes = app
   .route("/images", images)
   .route("/projects", projects)
   .route("/subscriptions", subscriptions)
-  .route("/campaign", campaign);
+  .route("/campaign", campaign)
+  .route("/media", media)
+  .route("/products", products);
 
 export const GET = handle(app);
 export const POST = handle(app);

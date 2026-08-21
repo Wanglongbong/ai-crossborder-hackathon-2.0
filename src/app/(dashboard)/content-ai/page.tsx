@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ProductCatalog } from "@/features/products/product-catalog";
 
 type Category = { id: string; name: string; slug: string; description: string; count: number; image: string; icon: string; parent: string };
 type Brand = { id: string; name: string; slug: string; tone: string; color: string; logo: string; cover: string; description: string; count: number };
@@ -28,8 +29,8 @@ export default function CampaignAdminPage() {
   const router = useRouter(); const searchParams = useSearchParams(); const active = searchParams.get("tab") || "products";
   const [products, setProducts] = useState<ProductMock[]>(mockProducts); const [categories, setCategories] = useState(defaultCategories); const [brands, setBrands] = useState(defaultBrands); const [tags, setTags] = useState(defaultTags); const [insights, setInsights] = useState(defaultInsights); const [metrics, setMetrics] = useState(defaultMetrics);
   const setTab = (tab: string) => router.push(`/content-ai?tab=${tab}`);
-  return <div className="mx-auto max-w-7xl space-y-5 pb-12"><Header onAdd={() => setTab("products")} /><AdminTabs active={active} onChange={setTab} />
-    {active === "products" && <Products products={products} setProducts={setProducts} router={router} showCreate={searchParams.get("action") === "new"} />}
+  return <div className="mx-auto max-w-7xl space-y-5 pb-12"><Header onAdd={() => router.push("/content-ai?tab=products&action=new")} /><AdminTabs active={active} onChange={setTab} />
+    {active === "products" && <ProductCatalog />}
     {active === "categories" && <Categories items={categories} setItems={setCategories} />}
     {active === "brands" && <Brands items={brands} setItems={setBrands} />}
     {active === "tags" && <SimpleCrud title="Tags" singular="tag" description="Labels for products, signals and reusable creative rules." items={tags} setItems={setTags} />}
