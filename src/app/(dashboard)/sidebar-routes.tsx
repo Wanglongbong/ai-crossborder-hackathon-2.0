@@ -6,7 +6,8 @@ import {
   Crown,
   Home,
   MessageCircleQuestion,
-  Layers,
+  Store,
+  Megaphone,
   Package,
   FolderTree,
   Palette,
@@ -14,7 +15,8 @@ import {
   Compass,
   BarChart3,
   ChevronDown,
-  Sparkles,
+  Images,
+  FilePlus2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -46,8 +48,10 @@ export const SidebarRoutes = () => {
   const { shouldBlock, isLoading, triggerPaywall } = usePaywall();
   const { isCollapsed } = useSidebar();
 
-  const isCampaignActive = pathname.startsWith("/content-ai") || pathname.startsWith("/workspace");
-  const [isCampaignMenuOpen, setIsCampaignMenuOpen] = useState(true);
+  const isStoreActive = pathname.startsWith("/content-ai") || pathname.startsWith("/product");
+  const isMediaActive = pathname.startsWith("/media");
+  const [isStoreMenuOpen, setIsStoreMenuOpen] = useState(true);
+  const [isMediaMenuOpen, setIsMediaMenuOpen] = useState(true);
 
   const onClickBilling = () => {
     if (shouldBlock) {
@@ -57,8 +61,9 @@ export const SidebarRoutes = () => {
     billingMutation.mutate();
   };
 
-  const campaignSubItems = [
-    { label: "Products", tab: "products", icon: Package },
+  const storeSubItems = [
+    { label: "All Products", tab: "products", icon: Package },
+    { label: "Add New Product", tab: "products", action: "new", icon: FilePlus2 },
     { label: "Categories", tab: "categories", icon: FolderTree },
     { label: "Brands", tab: "brands", icon: Palette },
     { label: "Tags", tab: "tags", icon: Tag },
@@ -112,51 +117,99 @@ export const SidebarRoutes = () => {
       <div className="px-3 space-y-1">
         <SidebarItem href="/" icon={Home} label="Dashboard" isActive={pathname === "/"} />
 
-        {/* Campaign Parent Item */}
+        <SidebarItem href="/campaigns" icon={Megaphone} label="Campaigns" isActive={pathname.startsWith("/campaigns") || pathname.startsWith("/workspace")} />
+
+        {/* WordPress-style Media Library */}
         <div>
           <div
             onClick={() => {
               if (isCollapsed) {
-                router.push("/content-ai?tab=products");
+                router.push("/media");
               } else {
-                setIsCampaignMenuOpen(!isCampaignMenuOpen);
+                setIsMediaMenuOpen(!isMediaMenuOpen);
               }
             }}
             className={cn(
               "flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold select-none",
-              isCampaignActive
+              isMediaActive
                 ? "bg-white shadow-xs text-indigo-700 font-bold border border-slate-200/60"
                 : "text-slate-700 hover:bg-slate-200/60",
               isCollapsed && "justify-center px-2"
             )}
           >
             <div className="flex items-center gap-2.5">
-              <Layers className="size-4 text-indigo-600 shrink-0" />
-              {!isCollapsed && <span>Campaign</span>}
+              <Images className="size-4 text-indigo-600 shrink-0" />
+              {!isCollapsed && <span>Media</span>}
+            </div>
+            {!isCollapsed && (
+              <ChevronDown className={cn("size-3.5 text-slate-400 transition-transform duration-200", isMediaMenuOpen && "rotate-180")} />
+            )}
+          </div>
+          {!isCollapsed && isMediaMenuOpen && (
+            <div className="pl-4 pr-1 pt-1 space-y-0.5 border-l-2 border-indigo-100 ml-5 mt-1">
+              {[
+                { label: "Library", href: "/media", icon: Images },
+                { label: "Add Media File", href: "/media?action=upload", icon: FilePlus2 },
+              ].map((item) => {
+                const ItemIcon = item.icon;
+                const isItemActive = isMediaActive && (item.href.includes("action=upload") ? searchParams.get("action") === "upload" : !searchParams.get("action"));
+                return (
+                  <button key={item.href} type="button" onClick={() => router.push(item.href)} className={cn("flex items-center w-full px-2.5 py-1.5 rounded-lg text-xs transition-colors text-left", isItemActive ? "bg-indigo-50 text-indigo-700 font-bold" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium")}>
+                    <ItemIcon className={cn("size-3.5 mr-2 shrink-0", isItemActive ? "text-indigo-600" : "text-slate-400")} />
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Products Parent Item */}
+        <div>
+          <div
+            onClick={() => {
+              if (isCollapsed) {
+                router.push("/content-ai?tab=products");
+              } else {
+                setIsStoreMenuOpen(!isStoreMenuOpen);
+              }
+            }}
+            className={cn(
+              "flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-semibold select-none",
+              isStoreActive
+                ? "bg-white shadow-xs text-indigo-700 font-bold border border-slate-200/60"
+                : "text-slate-700 hover:bg-slate-200/60",
+              isCollapsed && "justify-center px-2"
+            )}
+          >
+            <div className="flex items-center gap-2.5">
+              <Store className="size-4 text-indigo-600 shrink-0" />
+              {!isCollapsed && <span>Products</span>}
             </div>
             {!isCollapsed && (
               <ChevronDown
                 className={cn(
                   "size-3.5 text-slate-400 transition-transform duration-200",
-                  isCampaignMenuOpen && "rotate-180"
+                  isStoreMenuOpen && "rotate-180"
                 )}
               />
             )}
           </div>
 
           {/* Sub-menu (WooCommerce style sub-items) */}
-          {!isCollapsed && isCampaignMenuOpen && (
+          {!isCollapsed && isStoreMenuOpen && (
             <div className="pl-4 pr-1 pt-1 space-y-0.5 border-l-2 border-indigo-100 ml-5 mt-1">
-              {campaignSubItems.map((sub) => {
+              {storeSubItems.map((sub) => {
                 const SubIcon = sub.icon;
                 const isSubActive =
-                  pathname.startsWith("/content-ai") && currentTab === sub.tab;
+                  pathname.startsWith("/content-ai") && currentTab === sub.tab &&
+                  ("action" in sub ? searchParams.get("action") === sub.action : !searchParams.get("action"));
 
                 return (
                   <button
                     key={sub.tab}
                     type="button"
-                    onClick={() => router.push(`/content-ai?tab=${sub.tab}`)}
+                    onClick={() => router.push(`/content-ai?tab=${sub.tab}${"action" in sub ? `&action=${sub.action}` : ""}`)}
                     className={cn(
                       "flex items-center w-full px-2.5 py-1.5 rounded-lg text-xs transition-colors text-left",
                       isSubActive
