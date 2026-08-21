@@ -1,0 +1,57 @@
+
+> the-canvas@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.4
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 7.4s
+ ○ Compiling /src/middleware ...
+ ✓ Compiled /src/middleware in 2.3s (227 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 15.3s (1465 modules)
+ GET / 200 in 16948ms
+ ✓ Compiled in 1702ms (527 modules)
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 7.6s (949 modules)
+ ✓ Compiled in 2.1s (1973 modules)
+ ✓ Compiled in 0ms (1219 modules)
+ ✓ Compiled in 0ms (1219 modules)
+ GET /favicon.ico 200 in 11547ms
+ GET /?_rsc=xzcok 200 in 2587ms
+ GET /?_rsc=xzcok 200 in 33ms
+ GET /api/auth/session 200 in 13127ms
+ GET /api/subscriptions/current 200 in 13827ms
+ GET /api/projects/templates?page=1&limit=4 200 in 13830ms
+ GET /api/projects?page=1&limit=5 200 in 13835ms
+ GET / 307 in 298ms
+ GET /api/auth/signin 302 in 33ms
+ ○ Compiling /sign-in ...
+ ✓ Compiled /sign-in in 3.3s (1764 modules)
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000 200 in 3676ms
+ GET /api/subscriptions/current 200 in 829ms
+ ○ Compiling /campaigns ...
+ ✓ Compiled /campaigns in 931ms (1755 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1265ms (1758 modules)
+ GET /workspace/mock-skinglow-pro 404 in 214ms
+ GET /api/auth/session 200 in 52ms
+ GET /campaigns 200 in 211ms
+ GET /api/auth/session 200 in 127ms
+ GET /api/subscriptions/current 200 in 520ms
+ GET /campaigns 200 in 83ms
+ GET /api/auth/session 200 in 95ms
+ GET /api/subscriptions/current 200 in 161ms
+ ✓ Compiled in 1405ms (1966 modules)
+ GET /?_rsc=xzcok 200 in 319ms
+ GET /campaigns?_rsc=1sr58 200 in 324ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1204ms (1949 modules)
+ GET /campaigns?_rsc=1sr58 404 in 682ms
+ GET /?_rsc=xzcok 200 in 767ms
+ GET /campaigns?_rsc=1sr58 404 in 87ms
+ GET /?_rsc=xzcok 200 in 347ms
+ GET /campaigns 404 in 347ms
+ GET /api/auth/session 200 in 50ms
