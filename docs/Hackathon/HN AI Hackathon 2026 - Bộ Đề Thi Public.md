@@ -8,15 +8,15 @@ description:
 tags:
   - "clippings"
 ---
-|   |   |   |   |
-|---|---|---|---|
-|**Số**|**Mã**|**Tên ngắn gọn**|**Độ khó**|
-|Printway|PW1|Product Opportunity Hub (AI Product Research Copilot)|⭐⭐⭐⭐ (4/5)|
-|WEALIFY|WLF-01|Quản lý chi tiêu & an toàn giao dịch|⭐⭐⭐⭐ (4/5)|
-|BurgerPrints|BUP-01|AI_Ads_Video_Generator_Hackathon|⭐⭐⭐⭐ (4/5)|
-|BurgerPrints|BUP-02|AI_Design_Compliance_Checker_Hackathon|⭐⭐⭐⭐ (4/5)|
-|BytePlus|BP-01|Commerce Campaign Launch Copilot|⭐⭐⭐⭐ (4/5)|
-|BytePlus|BP-02|AI iTVC Campaign Studio|⭐⭐⭐⭐ (4/5)|
+|              |        |                                                       |            |
+| ------------ | ------ | ----------------------------------------------------- | ---------- |
+| **Số**       | **Mã** | **Tên ngắn gọn**                                      | **Độ khó** |
+| Printway     | PW1    | Product Opportunity Hub (AI Product Research Copilot) | ⭐⭐⭐⭐ (4/5) |
+| WEALIFY      | WLF-01 | Quản lý chi tiêu & an toàn giao dịch                  | ⭐⭐⭐⭐ (4/5) |
+| BurgerPrints | BUP-01 | AI_Ads_Video_Generator_Hackathon                      | ⭐⭐⭐⭐ (4/5) |
+| BurgerPrints | BUP-02 | AI_Design_Compliance_Checker_Hackathon                | ⭐⭐⭐⭐ (4/5) |
+| BytePlus     | BP-01  | Commerce Campaign Launch Copilot                      | ⭐⭐⭐⭐ (4/5) |
+| BytePlus     | BP-02  | AI iTVC Campaign Studio                               | ⭐⭐⭐⭐ (4/5) |
 
 ---
 

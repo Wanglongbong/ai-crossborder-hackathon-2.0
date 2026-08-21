@@ -37,6 +37,17 @@ export const SignInCard = () => {
     });
   };
 
+  const onDemoSignIn = () => {
+    setLoading(true);
+    setLoadingLogin(true);
+
+    signIn("credentials", {
+      email: "demo@thecanvas.local",
+      password: "Demo123!",
+      callbackUrl: "/",
+    });
+  };
+
   const onProviderSignIn = (provider: "github" | "google") => {
     setLoading(true);
     setLoadingGithub(provider === "github");
@@ -83,6 +94,16 @@ export const SignInCard = () => {
             )}
           </Button>
         </form>
+        <Button
+          onClick={onDemoSignIn}
+          size="lg"
+          variant="secondary"
+          className="w-full"
+          disabled={loading}
+        >
+          {loadingLogin ? <Loader2 className="mr-2 size-5 animate-spin" /> : null}
+          Try demo account
+        </Button>
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button

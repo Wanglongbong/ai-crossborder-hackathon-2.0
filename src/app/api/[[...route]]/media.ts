@@ -50,9 +50,9 @@ const app = new Hono()
       const input = c.req.valid("query");
       const conditions = [eq(mediaAssets.userId, userId), isNull(mediaAssets.deletedAt)];
       if (input.type !== "all") conditions.push(eq(mediaAssets.mediaType, input.type));
-      if (input.query) conditions.push(ilike(mediaAssets.name, `%${input.query}%`));
+      if (input.query) conditions.push(ilike(mediaAssets.displayName, `%${input.query}%`));
       if (input.month) conditions.push(sql`to_char(${mediaAssets.createdAt}, 'YYYY-MM') = ${input.month}`);
-      const order = input.sort === "oldest" ? asc(mediaAssets.createdAt) : input.sort === "name" ? asc(mediaAssets.name) : input.sort === "size" ? desc(mediaAssets.sizeBytes) : desc(mediaAssets.createdAt);
+      const order = input.sort === "oldest" ? asc(mediaAssets.createdAt) : input.sort === "name" ? asc(mediaAssets.displayName) : input.sort === "size" ? desc(mediaAssets.byteSize) : desc(mediaAssets.createdAt);
       const data = await db.select().from(mediaAssets).where(and(...conditions)).limit(input.limit).offset((input.page - 1) * input.limit).orderBy(order);
       return c.json({ data: data.map(serializeAsset), nextPage: data.length === input.limit ? input.page + 1 : null });
     },
@@ -60,9 +60,9 @@ const app = new Hono()
   .get("/filter-options", verifyAuth(), async (c) => {
     const userId = getUserId(c);
     if (!userId) return c.json({ error: "Unauthorized" }, 401);
-    const rows = await db.select({ createdAt: mediaAssets.createdAt, tagsJson: mediaAssets.tagsJson }).from(mediaAssets).where(and(eq(mediaAssets.userId, userId), isNull(mediaAssets.deletedAt)));
+    const rows = await db.select({ createdAt: mediaAssets.createdAt, metadataJson: mediaAssets.metadataJson }).from(mediaAssets).where(and(eq(mediaAssets.userId, userId), isNull(mediaAssets.deletedAt)));
     const months = Array.from(new Set(rows.map((row) => row.createdAt.toISOString().slice(0, 7)))).sort().reverse();
-    const tags = Array.from(new Set(rows.flatMap((row) => parseTags(row.tagsJson)))).sort();
+    const tags = Array.from(new Set(rows.flatMap((row) => readMetadata(row.metadataJson).tags))).sort();
     return c.json({ data: { months, tags } });
   })
   .post(
@@ -85,9 +85,9 @@ const app = new Hono()
     const userId = getUserId(c);
     if (!userId) return c.json({ error: "Unauthorized" }, 401);
     const input = c.req.valid("json");
-    const { tags, ...asset } = input;
+    const { tags } = input;
     const now = new Date();
-    const [data] = await db.insert(mediaAssets).values({ ...asset, tagsJson: JSON.stringify(tags), userId, createdAt: now, updatedAt: now }).returning();
+    const [data] = await db.insert(mediaAssets).values(toAssetValues(input, userId, tags, now)).returning();
     return c.json({ data: serializeAsset(data) }, 201);
   })
   .patch(
@@ -100,8 +100,10 @@ const app = new Hono()
       if (!userId) return c.json({ error: "Unauthorized" }, 401);
       const { id } = c.req.valid("param");
       const input = c.req.valid("json");
-      const { tags, ...asset } = input;
-      const [data] = await db.update(mediaAssets).set({ ...asset, tagsJson: tags ? JSON.stringify(tags) : undefined, updatedAt: new Date() }).where(and(eq(mediaAssets.id, id), eq(mediaAssets.userId, userId), isNull(mediaAssets.deletedAt))).returning();
+      const [current] = await db.select().from(mediaAssets).where(and(eq(mediaAssets.id, id), eq(mediaAssets.userId, userId), isNull(mediaAssets.deletedAt)));
+      if (!current) return c.json({ error: "Not found" }, 404);
+      const metadata = readMetadata(current.metadataJson);
+      const [data] = await db.update(mediaAssets).set({ displayName: input.name, altText: input.altText, caption: input.caption, metadataJson: input.tags ? { ...metadata, tags: input.tags } : undefined, updatedAt: new Date() }).where(eq(mediaAssets.id, id)).returning();
       if (!data) return c.json({ error: "Not found" }, 404);
       return c.json({ data: serializeAsset(data) });
     },
@@ -113,9 +115,9 @@ const app = new Hono()
     const [parent] = await db.select({ id: mediaAssets.id }).from(mediaAssets).where(and(eq(mediaAssets.id, id), eq(mediaAssets.userId, userId), isNull(mediaAssets.deletedAt)));
     if (!parent) return c.json({ error: "Not found" }, 404);
     const input = c.req.valid("json");
-    const { tags, ...asset } = input;
+    const { tags } = input;
     const now = new Date();
-    const [data] = await db.insert(mediaAssets).values({ ...asset, parentAssetId: id, tagsJson: JSON.stringify(tags), userId, createdAt: now, updatedAt: now }).returning();
+    const [data] = await db.insert(mediaAssets).values(toAssetValues(input, userId, tags, now, id)).returning();
     return c.json({ data: serializeAsset(data) }, 201);
   })
   .post("/bulk", verifyAuth(), zValidator("json", z.object({ ids: z.array(z.string()).min(1).max(200), action: z.enum(["trash", "tag"]), tag: z.string().max(50).optional() })), async (c) => {
@@ -128,7 +130,10 @@ const app = new Hono()
     }
     if (!tag) return c.json({ error: "Tag is required" }, 400);
     const rows = await db.select().from(mediaAssets).where(and(eq(mediaAssets.userId, userId), inArray(mediaAssets.id, ids), isNull(mediaAssets.deletedAt)));
-    await Promise.all(rows.map((row) => db.update(mediaAssets).set({ tagsJson: JSON.stringify(Array.from(new Set([...parseTags(row.tagsJson), tag]))), updatedAt: new Date() }).where(eq(mediaAssets.id, row.id))));
+    await Promise.all(rows.map((row) => {
+      const metadata = readMetadata(row.metadataJson);
+      return db.update(mediaAssets).set({ metadataJson: { ...metadata, tags: Array.from(new Set([...metadata.tags, tag])) }, updatedAt: new Date() }).where(eq(mediaAssets.id, row.id));
+    }));
     return c.json({ data: rows.map((row) => ({ id: row.id })) });
   })
   .delete("/:id", verifyAuth(), zValidator("param", z.object({ id: z.string() })), async (c) => {
@@ -140,10 +145,55 @@ const app = new Hono()
     return c.json({ data });
   });
 
-const parseTags = (value: string | null) => {
-  try { return JSON.parse(value || "[]") as string[]; } catch { return []; }
+type AssetMetadata = Record<string, unknown> & { tags: string[]; source?: string; parentAssetId?: string };
+
+const readMetadata = (value: Record<string, unknown> | null): AssetMetadata => {
+  const metadata = value || {};
+  return {
+    ...metadata,
+    tags: Array.isArray(metadata.tags) ? metadata.tags.filter((tag): tag is string => typeof tag === "string") : [],
+    source: typeof metadata.source === "string" ? metadata.source : undefined,
+    parentAssetId: typeof metadata.parentAssetId === "string" ? metadata.parentAssetId : undefined,
+  };
 };
 
-const serializeAsset = (asset: typeof mediaAssets.$inferSelect) => ({ ...asset, tags: parseTags(asset.tagsJson) });
+const toAssetValues = (input: z.infer<typeof assetInput>, userId: string, tags: string[], now: Date, parentAssetId?: string) => ({
+  userId,
+  createdByUserId: userId,
+  originalFileName: input.name,
+  displayName: input.name,
+  altText: input.altText,
+  caption: input.caption,
+  mediaType: input.mediaType,
+  mimeType: input.mimeType,
+  extension: input.name.includes(".") ? input.name.split(".").pop()?.toLowerCase() : undefined,
+  byteSize: input.sizeBytes,
+  width: input.width,
+  height: input.height,
+  durationMs: input.durationSeconds === undefined ? undefined : input.durationSeconds * 1000,
+  storageProvider: "r2",
+  storageBucket: process.env.R2_BUCKET,
+  storageKey: input.objectKey,
+  publicUrl: input.url,
+  visibility: "private",
+  metadataJson: { tags, source: input.source || "Upload", ...(parentAssetId ? { parentAssetId } : {}) },
+  createdAt: now,
+  updatedAt: now,
+});
+
+const serializeAsset = (asset: typeof mediaAssets.$inferSelect) => {
+  const metadata = readMetadata(asset.metadataJson);
+  return {
+    ...asset,
+    parentAssetId: metadata.parentAssetId,
+    name: asset.displayName,
+    objectKey: asset.storageKey || "",
+    url: asset.publicUrl || asset.sourceUrl || "",
+    sizeBytes: asset.byteSize,
+    durationSeconds: asset.durationMs === null ? undefined : Math.round(asset.durationMs / 1000),
+    source: metadata.source || "Upload",
+    tags: metadata.tags,
+  };
+};
 
 export default app;

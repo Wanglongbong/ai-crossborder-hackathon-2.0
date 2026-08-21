@@ -12,8 +12,22 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1787295982030,
-      "tag": "0001_shocking_wendigo",
+      "when": 1787296682017,
+      "tag": "0001_quick_leech",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787296707824,
+      "tag": "0002_noisy_valkyrie",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787296746121,
+      "tag": "0003_safe_doorman",
       "breakpoints": true
     }
   ]

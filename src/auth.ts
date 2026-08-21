@@ -14,6 +14,13 @@ const CredentialsSchema = z.object({
   password: z.string(),
 });
 
+const DEMO_ACCOUNT = {
+  id: "demo-user",
+  name: "Demo User",
+  email: "demo@thecanvas.local",
+  password: "Demo123!",
+};
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   adapter: DrizzleAdapter(db),
@@ -32,6 +39,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const { email, password } = validatedFields.data;
+
+        if (email === DEMO_ACCOUNT.email && password === DEMO_ACCOUNT.password) {
+          return {
+            id: DEMO_ACCOUNT.id,
+            name: DEMO_ACCOUNT.name,
+            email: DEMO_ACCOUNT.email,
+          };
+        }
+
         const [user] = await db
           .select()
           .from(users)

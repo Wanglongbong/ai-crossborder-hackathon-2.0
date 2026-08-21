@@ -38,13 +38,13 @@ BytePlus muốn tìm kiếm giải pháp:
 
 ### 3.1. Đầu vào yêu cầu (Input Specs)
 
-| Nhóm thông tin | Dữ liệu chi tiết cần tiếp nhận |
-| :--- | :--- |
-| **Product Brief** | Tên sản phẩm, ngành hàng (Category), USP (Key selling points), giá bán, ưu đãi/khuyến mãi, thị trường mục tiêu, Required Claims (câu bắt buộc phải nói), Restricted Claims (từ cấm, cam kết vi phạm chính sách). |
-| **Brand Kit** | Logo thương hiệu, bảng màu chủ đạo (Brand colors), Tone & Voice (sang trọng, năng động, hài hước, chuyên gia...), ảnh chụp sản phẩm thực tế (Product photos). |
-| **Audience Brief** | Chân dung khách hàng mục tiêu, ngôn ngữ (Tiếng Việt, Tiếng Anh, Thái, Indo...), kênh phân phối (TikTok Shop, Shopee, Facebook Ads, Instagram...), thị trường địa lý. |
-| **Market Signals** | Xu hướng thị trường (Trending keywords), thời điểm mùa vụ (Flash sale, 9.9, Giáng sinh), Pain point của người mua, góc tiếp cận của đối thủ, mục tiêu chiến dịch (Conversion, Traffic, Awareness). |
-| **Past Data (Optional)** | Dữ liệu lịch sử chiến dịch: CTR, CVR, ROAS, Watch time, Add-to-cart rate, phản hồi của khách hàng. |
+| Nhóm thông tin           | Dữ liệu chi tiết cần tiếp nhận                                                                                                                                                                                   |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Product Brief**        | Tên sản phẩm, ngành hàng (Category), USP (Key selling points), giá bán, ưu đãi/khuyến mãi, thị trường mục tiêu, Required Claims (câu bắt buộc phải nói), Restricted Claims (từ cấm, cam kết vi phạm chính sách). |
+| **Brand Kit**            | Logo thương hiệu, bảng màu chủ đạo (Brand colors), Tone & Voice (sang trọng, năng động, hài hước, chuyên gia...), ảnh chụp sản phẩm thực tế (Product photos).                                                    |
+| **Audience Brief**       | Chân dung khách hàng mục tiêu, ngôn ngữ (Tiếng Việt, Tiếng Anh, Thái, Indo...), kênh phân phối (TikTok Shop, Shopee, Facebook Ads, Instagram...), thị trường địa lý.                                             |
+| **Market Signals**       | Xu hướng thị trường (Trending keywords), thời điểm mùa vụ (Flash sale, 9.9, Giáng sinh), Pain point của người mua, góc tiếp cận của đối thủ, mục tiêu chiến dịch (Conversion, Traffic, Awareness).               |
+| **Past Data (Optional)** | Dữ liệu lịch sử chiến dịch: CTR, CVR, ROAS, Watch time, Add-to-cart rate, phản hồi của khách hàng.                                                                                                               |
 
 ---
 

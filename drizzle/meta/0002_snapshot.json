@@ -1,6 +1,6 @@
 {
-  "id": "2f09813f-3d30-44b4-8356-f4ac8200cf9e",
-  "prevId": "66af0f8e-540f-43a8-8e39-cf792c8dea3c",
+  "id": "a5763dd0-e393-4974-bbd3-f1178aef70b4",
+  "prevId": "2f09813f-3d30-44b4-8356-f4ac8200cf9e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1830,6 +1830,19 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
+        "category_parentId_category_id_fk": {
+          "name": "category_parentId_category_id_fk",
+          "tableFrom": "category",
+          "tableTo": "category",
+          "columnsFrom": [
+            "parentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
         "category_imageMediaId_media_asset_id_fk": {
           "name": "category_imageMediaId_media_asset_id_fk",
           "tableFrom": "category",
@@ -2930,6 +2943,19 @@
           "tableTo": "workspace",
           "columnsFrom": [
             "workspaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "media_folder_parentId_media_folder_id_fk": {
+          "name": "media_folder_parentId_media_folder_id_fk",
+          "tableFrom": "media_folder",
+          "tableTo": "media_folder",
+          "columnsFrom": [
+            "parentId"
           ],
           "columnsTo": [
             "id"

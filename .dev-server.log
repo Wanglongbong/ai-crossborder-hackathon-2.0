@@ -1,0 +1,133 @@
+
+> the-canvas@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.4
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.6s
+ ○ Compiling /src/middleware ...
+ ✓ Compiled /src/middleware in 1668ms (227 modules)
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 2.5s (405 modules)
+ GET /api/auth/signin 302 in 6860ms
+ ○ Compiling /sign-in ...
+ ✓ Compiled /sign-in in 13.1s (1268 modules)
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000 200 in 14283ms
+ ✓ Compiled in 1280ms (432 modules)
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 5.1s (854 modules)
+ GET /api/auth/session 200 in 5392ms
+ GET /favicon.ico 200 in 5569ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.3s (1506 modules)
+ GET / 307 in 2756ms
+ GET /api/auth/signin 302 in 34ms
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000 200 in 142ms
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000 200 in 70ms
+ GET /favicon.ico 200 in 49ms
+ GET /api/auth/session 200 in 86ms
+ GET / 307 in 126ms
+ GET /api/auth/signin 302 in 47ms
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000 200 in 39ms
+ GET /api/auth/session 200 in 16ms
+ GET /api/auth/session 200 in 14ms
+ ○ Compiling /api/[[...route]] ...
+ ✓ Compiled /api/[[...route]] in 3.8s (1210 modules)
+ POST /api/users 500 in 5750ms
+ ✓ Compiled in 1231ms (1751 modules)
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000&_rsc=4mbs6 200 in 265ms
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000&_rsc=4mbs6 200 in 268ms
+ GET /api/auth/csrf 200 in 39ms
+ POST /api/auth/callback/credentials 302 in 27ms
+ GET / 200 in 288ms
+ GET /api/auth/providers 200 in 36ms
+ GET /api/auth/csrf 200 in 17ms
+ POST /api/auth/callback/credentials? 200 in 20ms
+ GET / 200 in 82ms
+ GET /api/auth/session 200 in 241ms
+ GET /api/subscriptions/current 500 in 285ms
+ GET /api/projects/templates?page=1&limit=4 500 in 290ms
+ GET /api/projects?page=1&limit=5 500 in 275ms
+ GET /api/subscriptions/current 500 in 62ms
+ GET /api/projects/templates?page=1&limit=4 500 in 57ms
+ GET /api/projects?page=1&limit=5 500 in 60ms
+ GET /api/subscriptions/current 500 in 48ms
+ GET /api/projects/templates?page=1&limit=4 500 in 27ms
+ GET /api/projects?page=1&limit=5 500 in 42ms
+ GET /api/subscriptions/current 500 in 72ms
+ GET /api/projects/templates?page=1&limit=4 500 in 42ms
+ GET /api/projects?page=1&limit=5 500 in 36ms
+ GET /api/subscriptions/current 500 in 95ms
+ GET /api/projects/templates?page=1&limit=4 500 in 109ms
+ GET /api/projects?page=1&limit=5 500 in 126ms
+ GET /api/auth/session 200 in 204ms
+ GET /api/auth/session 200 in 71ms
+ GET /api/projects?page=1&limit=5 500 in 160ms
+ GET /api/subscriptions/current 500 in 164ms
+ GET /api/projects/templates?page=1&limit=4 500 in 170ms
+ POST /api/projects 500 in 57ms
+ GET /api/projects?page=1&limit=5 500 in 48ms
+ GET /api/subscriptions/current 500 in 51ms
+ GET /api/projects/templates?page=1&limit=4 500 in 47ms
+ GET /api/projects?page=1&limit=5 500 in 82ms
+ GET /api/subscriptions/current 500 in 33ms
+ GET /api/projects/templates?page=1&limit=4 500 in 39ms
+ GET /api/auth/session 200 in 68ms
+ GET /api/projects?page=1&limit=5 500 in 104ms
+ GET /api/projects/templates?page=1&limit=4 500 in 106ms
+ GET /api/subscriptions/current 500 in 109ms
+ GET /api/auth/session 200 in 51ms
+ GET /api/projects?page=1&limit=5 500 in 105ms
+ GET /api/projects/templates?page=1&limit=4 500 in 109ms
+ GET /api/subscriptions/current 500 in 114ms
+ GET /api/auth/session 200 in 63ms
+ GET /api/projects?page=1&limit=5 500 in 106ms
+ GET /api/subscriptions/current 500 in 109ms
+ GET /api/projects/templates?page=1&limit=4 500 in 112ms
+ GET /api/auth/session 200 in 47ms
+ GET / 307 in 91ms
+ GET /api/auth/signin 302 in 39ms
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000 200 in 212ms
+ GET /api/auth/session 200 in 41ms
+ GET /api/auth/providers 200 in 34ms
+ GET /api/auth/csrf 200 in 18ms
+ POST /api/auth/callback/credentials? 200 in 18ms
+ GET / 200 in 62ms
+ GET /api/auth/session 200 in 91ms
+ GET /api/subscriptions/current 500 in 114ms
+ GET /api/projects/templates?page=1&limit=4 500 in 108ms
+ GET /api/projects?page=1&limit=5 500 in 111ms
+ GET /api/subscriptions/current 500 in 68ms
+ GET /api/projects/templates?page=1&limit=4 500 in 72ms
+ GET /api/projects?page=1&limit=5 500 in 75ms
+ GET /api/subscriptions/current 500 in 60ms
+ GET /api/projects?page=1&limit=5 500 in 59ms
+ GET /api/projects/templates?page=1&limit=4 500 in 63ms
+ ○ Compiling /content-ai ...
+ ✓ Compiled /content-ai in 1970ms (1767 modules)
+ GET /api/subscriptions/current 500 in 178ms
+ GET /api/auth/session 200 in 68ms
+ GET /api/subscriptions/current 500 in 161ms
+   Reload env: .env.local
+ ✓ Compiled in 1056ms (1722 modules)
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000&_rsc=4mbs6 200 in 510ms
+ GET /content-ai?tab=products&_rsc=ip8w2 200 in 573ms
+ GET /?_rsc=xzcok 200 in 597ms
+ ✓ Compiled in 853ms (1722 modules)
+ GET /sign-in?callbackUrl=http%3A%2F%2Flocalhost%3A3000&_rsc=4mbs6 200 in 137ms
+ GET /content-ai?tab=products&_rsc=deh2q 200 in 178ms
+ GET /?_rsc=xzcok 200 in 182ms
+ ○ Compiling /api/[[...route]] ...
+ ✓ Compiled /api/[[...route]] in 693ms (958 modules)
+ ✓ Compiled (1226 modules)
+ GET /api/auth/session 200 in 1939ms
+ GET /api/subscriptions/current 200 in 3249ms
+ GET /api/projects?page=1&limit=5 200 in 3244ms
+ GET /api/projects/templates?page=1&limit=4 200 in 3252ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.1s (1770 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 2546ms
+[?25h
